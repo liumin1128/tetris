@@ -99,6 +99,8 @@ class Item {
 class Game {
   item?: Item;
   floor: Floor;
+  speed: number;
+  speedUp: boolean;
   ctx: CanvasRenderingContext2D;
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
@@ -129,6 +131,10 @@ class Game {
         case 40: {
           // move(2);
           console.log("down")
+
+          // todo: 解决重复计算的问题
+          this.speedUp = true
+          this.compute()
           break;
         }
 
@@ -140,6 +146,31 @@ class Game {
         }
       }
     });
+
+    document.body.addEventListener("keyup", (e) => {
+      switch (e.keyCode) {
+        case 38: {
+          console.log("up keyup")
+          break;
+        }
+
+        case 39: {
+          console.log("right keyup")
+          break;
+        }
+
+        case 40: {
+          console.log("down keyup")
+          this.speedUp = false
+          break;
+        }
+
+        case 37: {
+          console.log("left keyup")
+          break;
+        }
+      }
+    })
   };
 
   move = (d: number) => {
@@ -207,6 +238,9 @@ class Game {
     });
 
     if (luodi) {
+
+      this.speedUp = false
+
       // 将item合并到floor
       this.floor.dots = this.floor.dots.concat(this.item.dots);
       // this.item = undefined;
@@ -236,7 +270,11 @@ class Game {
     });
 
     if (!over) {
-      setTimeout(this.compute, 1000);
+      if(this.speedUp) {
+        requestAnimationFrame(this.compute)
+      } else {
+        setTimeout(this.compute, 1000);
+      }
     }
   };
   render = () => {
@@ -244,15 +282,15 @@ class Game {
     // console.log(this.item);
     ctx.clearRect(0, 0, 300, 300);
     this.ctx.fillStyle = "#ccc";
-    ctx.fillRect(0, 0, WIDTH * UNIT + (WIDTH - 1) * PADDING, HEIGHT * UNIT + (HEIGHT - 1) * PADDING);
+    ctx.fillRect(0, 0, WIDTH * UNIT + (WIDTH + 1) * PADDING, HEIGHT * UNIT + (HEIGHT + 1) * PADDING);
 
     this.item?.dots.forEach((dot) => {
       // console.log(dot);
       this.ctx.beginPath();
       this.ctx.fillStyle = "red";
       this.ctx.fillRect(
-        dot.x * UNIT + (dot.x - 1) * PADDING,
-        dot.y * UNIT + (dot.y - 1) * PADDING,
+        dot.x * UNIT + (dot.x + 1) * PADDING,
+        dot.y * UNIT + (dot.y + 1) * PADDING,
         UNIT,
         UNIT
       );
@@ -262,10 +300,10 @@ class Game {
     this.floor?.dots.forEach((dot) => {
       // console.log(dot);
       this.ctx.beginPath();
-      this.ctx.fillStyle = "red";
+      this.ctx.fillStyle = "green";
       this.ctx.fillRect(
-        dot.x * UNIT + (dot.x - 1) * PADDING,
-        dot.y * UNIT + (dot.y - 1) * PADDING,
+        dot.x * UNIT + (dot.x + 1) * PADDING,
+        dot.y * UNIT + (dot.y + 1) * PADDING,
         UNIT,
         UNIT
       );
