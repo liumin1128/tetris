@@ -101,6 +101,7 @@ class Game {
   floor: Floor;
   speed: number;
   speedUp: boolean;
+  timer: number;
   ctx: CanvasRenderingContext2D;
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
@@ -124,6 +125,7 @@ class Game {
         case 39: {
           // move(1);
           console.log("right")
+          window.clearTimeout(this.timer);
           this.move(1)
           break;
         }
@@ -131,7 +133,7 @@ class Game {
         case 40: {
           // move(2);
           console.log("down")
-
+          window.clearTimeout(this.timer);
           // todo: 解决重复计算的问题
           this.speedUp = true
           this.compute()
@@ -271,9 +273,9 @@ class Game {
 
     if (!over) {
       if(this.speedUp) {
-        requestAnimationFrame(this.compute)
+        this.timer = setTimeout(this.compute, 16)
       } else {
-        setTimeout(this.compute, 1000);
+        this.timer = setTimeout(this.compute, 1000);
       }
     }
   };
