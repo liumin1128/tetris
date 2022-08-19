@@ -6,8 +6,8 @@ const ctx: CanvasRenderingContext2D = cvs.getContext("2d");
 ctx.fillStyle = "#cccccc";
 ctx.fillRect(0, 0, 300, 300);
 
-const WIDTH = 10;
-const HEIGHT = 20;
+const WIDTH = 5;
+const HEIGHT = 10;
 const UNIT = 10;
 const PADDING = 1;
 
@@ -24,7 +24,9 @@ class Floor {
   dots: Dot[];
   // c: string;
   constructor() {
-    this.dots = [];
+    this.dots = [
+
+    ];
   }
 }
 
@@ -99,10 +101,12 @@ class Item {
 class Game {
   item?: Item;
   floor: Floor;
+  status: string;
   speed: number;
   speedUp: boolean;
   timer: number;
   ctx: CanvasRenderingContext2D;
+  fullLine: number[]
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
     this.floor = new Floor();
@@ -110,7 +114,9 @@ class Game {
   start = () => {
     this.item = undefined;
     this.loop();
-    this.compute();
+    // this.compute();
+
+    this.status = "掉落中";
     // this.addItemLoop()
 
     // 映射键盘按键
@@ -118,32 +124,32 @@ class Game {
       switch (e.keyCode) {
         case 38: {
           // move(0);
-          console.log("up")
+          console.log("up");
           break;
         }
 
         case 39: {
           // move(1);
-          console.log("right")
-          window.clearTimeout(this.timer);
-          this.move(1)
+          console.log("right");
+          // window.clearTimeout(this.timer);
+          this.move(1);
           break;
         }
 
         case 40: {
           // move(2);
-          console.log("down")
-          window.clearTimeout(this.timer);
-          // todo: 解决重复计算的问题
-          this.speedUp = true
-          this.compute()
+          console.log("down");
+          // window.clearTimeout(this.timer);
+          // // todo: 解决重复计算的问题
+          // this.speedUp = true;
+          this.compute();
           break;
         }
 
         case 37: {
           // move(3);
-          console.log("left")
-          this.move(-1)
+          console.log("left");
+          this.move(-1);
           break;
         }
       }
@@ -152,38 +158,36 @@ class Game {
     document.body.addEventListener("keyup", (e) => {
       switch (e.keyCode) {
         case 38: {
-          console.log("up keyup")
+          console.log("up keyup");
           break;
         }
 
         case 39: {
-          console.log("right keyup")
+          console.log("right keyup");
           break;
         }
 
         case 40: {
-          console.log("down keyup")
-          this.speedUp = false
+          console.log("down keyup");
+          this.speedUp = false;
           break;
         }
 
         case 37: {
-          console.log("left keyup")
+          console.log("left keyup");
           break;
         }
       }
-    })
+    });
   };
 
   move = (d: number) => {
-
-
     let pengzhuang = false;
 
     this.item?.dots.forEach((dot) => {
       // 落地
 
-      if (dot.x + d < 0 || dot.x + d >= 10) {
+      if (dot.x + d < 0 || dot.x + d >= WIDTH) {
         pengzhuang = true;
         console.log("pengzhuang");
       } else {
@@ -196,20 +200,20 @@ class Game {
       }
     });
 
-    if(pengzhuang) {
-
+    if (pengzhuang) {
     } else {
       this.item?.dots.forEach((dot) => {
         dot.x += d;
       });
     }
-  }
+  };
 
   addItem = () => {
     const num = Math.floor(Math.random() * 4);
     console.log("num");
     console.log(num);
     const item = new Item(num);
+    // const item = new Item(2);
     this.item = item;
   };
   loop = () => {
@@ -221,70 +225,126 @@ class Game {
   compute = () => {
     // console.log("compute");
 
-    let luodi = false;
+    console.log(JSON.stringify(this.floor.dots));
 
-    this.item?.dots.forEach((dot) => {
-      // 落地
+    switch (this.status) {
+      case "掉落中": {
+        console.log("掉落中");
+        let luodi = false;
 
-      if (dot.y + 1 >= 20) {
-        luodi = true;
-        console.log("luodi");
-      } else {
-        this.floor.dots.forEach((fdot) => {
-          if (dot.x === fdot.x && dot.y + 1 === fdot.y) {
+        this.item?.dots.forEach((dot) => {
+          if (dot.y + 1 >= HEIGHT) {
             luodi = true;
-            console.log("luodi");
+          } else {
+            this.floor.dots.forEach((fdot) => {
+              if (dot.x === fdot.x && dot.y + 1 === fdot.y) {
+                luodi = true;
+              }
+            });
           }
         });
+
+        if (luodi) {
+          // 取消加速
+          this.speedUp = false;
+
+          // 将item合并到floor
+          const allDots = this.floor.dots.concat(this.item?.dots as Dot[]);
+
+          console.log("allDots");
+          console.log(allDots);
+
+          // this.item = undefined
+
+          let fullLine: number[] = [];
+          for (let i = 0; i < HEIGHT; i++) {
+            const line = allDots.filter((j) => j.y === i);
+            if (line.length === WIDTH) {
+              fullLine.push(i);
+            }
+          }
+
+          this.fullLine = fullLine
+
+          console.log("fullLine");
+          console.log(fullLine);
+
+          if (fullLine.length > 0) {
+            this.item = undefined;
+            this.floor.dots = allDots.filter(
+              (i) => !fullLine.some((j) => j === i.y)
+            );
+
+            this.status = "消除中";
+          } else {
+            this.item = undefined;
+            this.floor.dots = allDots;
+            this.status = "生成中";
+          }
+        } else {
+          this.item?.dots.forEach((dot) => {
+            dot.y += 1;
+          });
+        }
+
+        break;
       }
-    });
 
-    if (luodi) {
+      case "生成中": {
+        console.log("生成中");
 
-      this.speedUp = false
+        this.addItem();
+        this.status = "掉落中";
+        break;
+      }
+      case "消除中": {
+        console.log("消除中");
 
-      // 将item合并到floor
-      this.floor.dots = this.floor.dots.concat(this.item.dots);
-      // this.item = undefined;
+        this.fullLine.map(f => {
+          this.floor?.dots.forEach((dot) => {
+            console.log("111111",dot)
+            if (dot.y < f) {
+              dot.y ++;
+            }
+          });
+        })
 
-      // 扫描完整的一行
-      // this.floor.dots.forEach((fdot) => {
-      //   if (fdot.y <= 1) {
-      //     console.log("Game Over");
-      //     over = true;
-      //   }
-      // });
+        
 
 
-      this.addItem();
-    } else {
-      this.item?.dots.forEach((dot) => {
-        dot.y += 1;
-      });
+        this.status = "生成中";
+        break;
+      }
+      default:
     }
 
-    let over = false;
-    this.floor.dots.forEach((fdot) => {
-      if (fdot.y <= 1) {
-        console.log("Game Over");
-        over = true;
-      }
-    });
+    // let over = false;
+    // this.floor.dots.forEach((fdot) => {
+    //   if (fdot.y <= 1) {
+    //     console.log("Game Over");
+    //     over = true;
+    //   }
+    // });
 
-    if (!over) {
-      if(this.speedUp) {
-        this.timer = setTimeout(this.compute, 16)
-      } else {
-        this.timer = setTimeout(this.compute, 1000);
-      }
-    }
+    // if (!over) {
+    //   if (this.speedUp) {
+    //     // this.timer = setTimeout(this.compute, 16);
+    //   } else {
+    //     this.timer = setTimeout(this.compute, 1000);
+    //   }
+    // }
   };
   render = () => {
     // console.log(this.floor);
     // console.log(this.item);
     ctx.clearRect(0, 0, 300, 300);
     this.ctx.fillStyle = "#ccc";
-    ctx.fillRect(0, 0, WIDTH * UNIT + (WIDTH + 1) * PADDING, HEIGHT * UNIT + (HEIGHT + 1) * PADDING);
+    ctx.fillRect(
+      0,
+      0,
+      WIDTH * UNIT + (WIDTH + 1) * PADDING,
+      HEIGHT * UNIT + (HEIGHT + 1) * PADDING
+    );
 
     this.item?.dots.forEach((dot) => {
       // console.log(dot);
