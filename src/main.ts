@@ -3,11 +3,11 @@ import "./style.css";
 const cvs = document.getElementById("canvas");
 const ctx: CanvasRenderingContext2D = cvs.getContext("2d");
 
-ctx.fillStyle = "#cccccc";
+// ctx.fillStyle = "#cccccc";
 ctx.fillRect(0, 0, 300, 300);
 
-const WIDTH = 5;
-const HEIGHT = 10;
+const WIDTH = 10;
+const HEIGHT = 20;
 const UNIT = 10;
 const PADDING = 1;
 
@@ -114,7 +114,7 @@ class Game {
   start = () => {
     this.item = undefined;
     this.loop();
-    // this.compute();
+    this.compute();
 
     this.status = "掉落中";
     // this.addItemLoop()
@@ -139,9 +139,9 @@ class Game {
         case 40: {
           // move(2);
           console.log("down");
-          // window.clearTimeout(this.timer);
+          window.clearTimeout(this.timer);
           // // todo: 解决重复计算的问题
-          // this.speedUp = true;
+          this.speedUp = true;
           this.compute();
           break;
         }
@@ -318,27 +318,27 @@ class Game {
       default:
     }
 
-    // let over = false;
-    // this.floor.dots.forEach((fdot) => {
-    //   if (fdot.y <= 1) {
-    //     console.log("Game Over");
-    //     over = true;
-    //   }
-    // });
+    let over = false;
+    this.floor.dots.forEach((fdot) => {
+      if (fdot.y <= 1) {
+        console.log("Game Over");
+        over = true;
+      }
+    });
 
-    // if (!over) {
-    //   if (this.speedUp) {
-    //     // this.timer = setTimeout(this.compute, 16);
-    //   } else {
-    //     this.timer = setTimeout(this.compute, 1000);
-    //   }
-    // }
+    if (!over) {
+      if (this.speedUp) {
+        this.timer = setTimeout(this.compute, 16);
+      } else {
+        this.timer = setTimeout(this.compute, 1000);
+      }
+    }
   };
   render = () => {
     // console.log(this.floor);
     // console.log(this.item);
     ctx.clearRect(0, 0, 300, 300);
-    this.ctx.fillStyle = "#ccc";
+    this.ctx.fillStyle = "#000";
     ctx.fillRect(
       0,
       0,
