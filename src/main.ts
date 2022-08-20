@@ -1,6 +1,8 @@
 import "./style.css";
 
 const cvs = document.getElementById("canvas");
+
+// @ts-ignore
 const ctx: CanvasRenderingContext2D = cvs.getContext("2d");
 
 // ctx.fillStyle = "#cccccc";
@@ -35,18 +37,9 @@ class Item {
   dots: Dot[];
   c: string;
   constructor(t: number) {
-    // this.t = t;
-    // this.dots = [new Dot(0, 0)];
-    // this.c = "#fff";
-
-    // this.t = t;
-    // this.dots = [new Dot(0, 0),new Dot(0, 1),new Dot(1, 0),new Dot(1, 1)];
-    // this.c = "#fff";
-
-    // this.t = t;
-    // this.dots = [new Dot(0, 0),new Dot(0, 1),new Dot(1, 1),new Dot(1, 2)];
-    // this.c = "#fff";
-
+    this.t = t;
+    this.dots = [];
+    this.c = "#fff";
     switch (t) {
       case 0: {
         this.t = t;
@@ -108,6 +101,11 @@ class Game {
   ctx: CanvasRenderingContext2D;
   fullLine: number[]
   constructor(ctx: CanvasRenderingContext2D) {
+    this.status = "等待中"
+    this.speed = 0
+    this.speedUp = false
+    this.timer = 0
+    this.fullLine = []
     this.ctx = ctx;
     this.floor = new Floor();
   }
